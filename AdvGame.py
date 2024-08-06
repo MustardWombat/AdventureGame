@@ -1,9 +1,11 @@
 import random
 
 # Declare global variables
-RED = "\033[91m"
-YELLOW = "\033[93m"
 RESET = "\033[0m"
+RED = "\033[91m"
+GREEN = "\033[92m"
+YELLOW = "\033[93m"
+BLUE = "\033[94m"
 stat = ''
 health = 0
 coin = 0
@@ -13,6 +15,9 @@ def healthchange(new_health):
     # Check if the health value has changed
     if new_health != health:
         health = new_health
+    if health <= 0:
+        print("You Died!")
+        restart()
 
 def coinchange(new_coin):
     global coin
@@ -25,12 +30,12 @@ def main():
     global stat, health, coin  # Use global variables
     int()
     print("Welcome adventurer, who would you like to be?")
-    print("(1) Fast and athletic")
+    print(f"{BLUE}(1) Fast and athletic")
     print("(2) Clever and smart")
     print("(3) Strong and durable")
     print("(4) Lucky")
 
-    choice = input("Make your choice: ")
+    choice = input(f"{RESET}Make your choice: ")
     if choice == '1':
         stat = 'fast'
         health = 6
@@ -58,14 +63,12 @@ def path0():
     global health
     int()
     print("You see a cave while hiking, what do you do?")
-    print("(1) Enter the cave")
+    print(f"{BLUE}(1) Enter the cave")
     print("(2) Give up, I'm not the adventurous type")
 
-    choice = input("Make your choice: ")
+    choice = input(f"{RESET}Make your choice: ")
     if choice == '1':
         int()
-        print("You enter the cave, you see a door, but it's locked.")
-        print("You also see an old bridge over a ravine")
         path1()
     elif choice == '2':
         int()
@@ -77,12 +80,13 @@ def path0():
         path0()
 
 def path1():
-    int()
-    print("(1) Turn back, this is too scary")
+    print("You enter the cave, you see a door, but it's locked.")
+    print("You also see an old bridge over a ravine")
+    print(f"{BLUE}(1) Turn back, this is too scary")
     print("(2) RISK: Pick the lock")
     print("(3) RISK: Take the old bridge")
     
-    choice = input("Make your choice: ")
+    choice = input(f"{RESET}Make your choice: ")
     if choice == '1':
         print("You turned back home, and you never know what lies beyond the cave.")
         restart()
@@ -98,33 +102,40 @@ def handle_lock_pick():
     global stat
     if stat == 'clever':
         print("Using your clever nature, this was no challenge to you")
-        print("You successfully picked the lock!!")
-        patha0()
+        handle_lock_pick_success()
     elif stat == 'fast':
         if random.randint(1, 2) == 1:
-            print("You successfully picked the lock!!")
-            patha0() 
+            handle_lock_pick_success()
         else:
             print("Your fast nature caused you to rush the process, you injure yourself")
-            healthchange(health - 2)  # Update health and print if changed
-            path1()
+            handle_lock_pick_failure()
     elif stat == 'lucky':
         if random.randint(1, 10) >= 2:
-            print("You successfully picked the lock!!")
-            patha0()
+            handle_lock_pick_success()
         else:
-            print("Your lockpick snapped, and the cave closed the entrance, locking you inside forever")
-            restart()
+            handle_lock_pick_failure()
     else:
         if random.randint(1, 2) == 1:
-            print("You successfully picked the lock!!")
-            patha0()
+            handle_lock_pick_success()
         else:
-            print("Your lockpick snapped, and the cave closed the entrance, locking you inside forever")
-            restart()
+            handle_lock_pick_failure()
+
+def handle_lock_pick_success():
+    coinchange(coin + 10)
+    int()
+    print("You successfully picked the lock!!")
+    print("inside, you found 10 coins!")
+    path1()
+
+def handle_lock_pick_failure():
+    int()
+    print("Your lockpick snapped, and you injure yourself")
+    healthchange(health - 2)
+    handle_lock_pick()
 
 def handle_bridge():
     if stat == 'fast':
+        int()
         print("You are fast, and you make it across the bridge safely.")
         pathb0()
     elif random.randint(1, 2) == 1:
@@ -133,11 +144,6 @@ def handle_bridge():
     else:
         print("You fell off the bridge")
         restart()
-
-def patha0():
-    print('You made it past the door to the treasure!')
-    coinchange(coin + 6)
-    path0()
 
 def pathb0():
     print('Past the bridge you see a tomb with a puzzle')
@@ -157,7 +163,6 @@ def pathb0():
         incorrect_guesses = 0
         max_attempts = 6
 
-        print("Welcome to Hangman!")
         print(f"The word has {len(word)} letters.")
 
         while incorrect_guesses < max_attempts or health > 0:
@@ -202,14 +207,17 @@ def restart():
 
     if choice.upper() == 'Y':
         global health
+        global coin
         health = 0  # Reset health
+        coin = 0
         main()
     else:
         print("Exiting the game...")
         exit()
 
 def int():
-    print('')
+    for _ in range(10):
+        print('')
     if health != 0:
         health_display = f"{RED}|{RESET}" * health
         print(f"HEALTH: {health_display}")
